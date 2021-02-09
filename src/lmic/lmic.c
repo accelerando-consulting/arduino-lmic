@@ -1942,9 +1942,13 @@ static bit_t buildDataFrame (void) {
 
     u1_t maxFlen = LMICbandplan_maxFrameLen(LMIC.datarate);
 
-    if (flen > maxFlen) {
-        LMICOS_logEventUint32("frame too long for this bandplan", ((u4_t)dlen << 16) | (flen << 8) | maxFlen);
-        return 0;
+    if (maxFlen > 0) {
+	// some bandplans return zero for 'invalid channel'.
+	// We can't reasonably check length in this case
+	if (flen > maxFlen) {
+	    LMICOS_logEventUint32("frame too long for this bandplan", ((u4_t)dlen << 16) | (flen << 8) | maxFlen);
+	    return 0;
+	}
     }
 
     LMIC.frame[OFF_DAT_HDR] = HDR_FTYPE_DAUP | HDR_MAJOR_V1;
